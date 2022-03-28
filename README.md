@@ -9,6 +9,8 @@ This is a list and brief description of scripts which are contain useful example
 
 [test-case-converter.js](Node/test-case-convert.js) - Parses CSV files and creates C# test case class using pipes
 
+[extract-text-from-lines.js](Node/extract-text-from-lines.js) - Parses a file line by line and extracts values from each line based on a test. Uses node `readline` in an async self executing function.
+
 ## Powershell
 
 [Invoke-Coverage.ps1](Powershell/Invoke-Coverage.ps1) - Runs `dotnet test` with coverage using Coverlet.MSBuild or Coverlet.Collector and merges the results into a report using ReportGenerator.
