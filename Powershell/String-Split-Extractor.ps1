@@ -1,0 +1,1 @@
+Select-String -Path .\run_48.log -Pattern "after \d retries with correlation id: ." -AllMatches |  Select-Object line | Select-String -Pattern "(UW_)?(OA)?\d{8}(\/|\)\d" |  % {$_.Matches.Groups[0].Value}

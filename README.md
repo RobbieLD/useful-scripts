@@ -19,6 +19,8 @@ This is a list and brief description of scripts which are contain useful example
 
 [New-Sln.ps1](Powershell/New-Sln.ps1) - Creates a new .sln file for the csproj projects in the current directory matching the directory structure with solution directories.
 
+[String-Split-Extractor.ps1](Powershell/String-Split-Extractor.ps1) - Example usage of using String-Split to find lines in a file and then piping that into String-Split again to use regex to extract values from the selected lines.
+
 ## SQL
 
 [Current_Sessions.sql](SQL/Current_Sessions.sql) - Selects the sessions currently logged in to the database
