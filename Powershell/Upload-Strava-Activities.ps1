@@ -98,7 +98,7 @@ Function Read-Config {
         # refresh token
         if ($config.expires_at -lt (Get-Date -UFormat %s)) {
             $config = Get-RefreshAuthToken -id $id -secret $secret -refresh $config.refresh_token
-            Out-File -FilePath $configPath -InputObject $config.Content
+            Set-Content -Path $configPath -Value $config.Content
         }
 
         Write-Output $config.access_token
