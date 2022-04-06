@@ -21,6 +21,10 @@ This is a list and brief description of scripts which are contain useful example
 
 [String-Split-Extractor.ps1](Powershell/String-Split-Extractor.ps1) - Example usage of using String-Split to find lines in a file and then piping that into String-Split again to use regex to extract values from the selected lines.
 
+[Photo-Import.ps1](Powershell/Photo-Import.ps1) - Copies photos from a memory card to a hard drive. Also creates a destination folder with the current date and optional name tag.
+
+[Upload-Strava-Activities.ps1](Powershell/Upload-Strava-Activities.ps1) - Performs the Strava OAuth flow and uploads activities from a garmin device.
+
 ## SQL
 
 [Current_Sessions.sql](SQL/Current_Sessions.sql) - Selects the sessions currently logged in to the database
