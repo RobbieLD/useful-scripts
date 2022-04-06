@@ -1,22 +1,48 @@
 # Uploads an activity to strava with a given name and api key
-# Client_Id: 80515
+[CmdletBinding()]
 param(
-    [string] $apiKey,
-    [string] $device,
-    [string] $clientId,
-    [string] $clientSecret,
-    [string] $configFileName
+    [Parameter()]
+    [string]
+    $Device,
+    [Parameter()]
+    [string]
+    $ClientId,
+    [Parameter()]
+    [string]
+    $ClientSecret,
+    [Parameter()]
+    [string]
+    $ConfigFileName
 )
 
-Function Get-AuthCode($id) {
+Function Get-AuthCode {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $id
+    )
+
     $authEndpoint = "https://www.strava.com/oauth/authorize?client_id=$id&redirect_uri=http://localhost&scope=activity%3Aread_all%2Cactivity%3Awrite&response_type=code"
     Write-Host "A browser will now open and ask you to authorize the app. Please paste the code=### value from the redirected url below"
     Start-Process $authEndpoint
-    $authCode = Read-Host "Please enter auth code"
-    return $authCode
+    Read-Host "Please enter auth code" | Write-Output
+    
 }
 
-Function Get-AuthToken($id, $secret, $code) {
+Function Get-AuthToken {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $id,
+        [Parameter()]
+        [string]
+        $secret,
+        [Parameter()]
+        [string]
+        $code
+    )
     $endpoint = 'https://www.strava.com/oauth/token'
     $body = @{
         client_id = $id
@@ -25,11 +51,22 @@ Function Get-AuthToken($id, $secret, $code) {
         grant_type = 'authorization_code'
     }
 
-    $response = Invoke-WebRequest -Method 'Post' -Uri $endpoint -Body $body
-    return $response | ConvertFrom-Json
+    Invoke-RestMethod -Method 'Post' -Uri $endpoint -Body $body | Write-Output
 }
 
-Function Get-RefreshAuthToken($id, $secret, $refresh) {
+Function Get-RefreshAuthToken {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $id,
+        [Parameter()]
+        [string]
+        $secret,
+        [Parameter()]
+        [string]
+        $refresh
+    )
     $endpoint = 'https://www.strava.com/oauth/token'
     $body = @{
         client_id = $id
@@ -38,70 +75,130 @@ Function Get-RefreshAuthToken($id, $secret, $refresh) {
         refresh_token = $refresh
     }
 
-    $response = Invoke-WebRequest -Method 'Post' -Uri $endpoint -Body $body
-    return $response | ConvertFrom-Json
+    Invoke-RestMethod -Method 'Post' -Uri $endpoint -Body $body | Write-Output
 }
-Function Get-Authorisation($id, $secret, $code, $configPath) {
+Function Read-Config {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $id,
+        [Parameter()]
+        [string]
+        $secret,
+        [Parameter()]
+        [string]
+        $configPath
+    )
 
     # Read auth config if it exists
     if (Test-Path -Path $configPath -PathType Leaf) {
         $config = Get-Content -Path $configPath | ConvertFrom-Json
 
         # refresh token
-        if ($config.expires_at -lt (New-TimeSpan -Start (Get-Date "01/01/1970") -End (Get-Date)).TotalSeconds) {
-            $config = Get-RefreshAuthToken($id, $secret, $config.refresh_token)
-            Out-File $configPath $config
-            return $config.refresh_token
-        } 
-        else {
-            return $config.access_token
+        if ($config.expires_at -lt (Get-Date -UFormat %s)) {
+            $config = Get-RefreshAuthToken -id $id -secret $secret -refresh $config.refresh_token
+            Out-File -FilePath $configPath -InputObject $config.Content
         }
+
+        Write-Output $config.access_token
     }
     # No config exists so we need to auth the app
     else {
-        $authorisationCode = Get-AuthCode($id)
-        $config = Get-AuthToken($id, $secret, $authorisationCode)
-        Out-File $configPath $config
-        return $config.refresh_token
+        $authorisationCode = Get-AuthCode -id $id
+        $config = Get-AuthToken -id $id -secret $secret -code $authorisationCode
+        Out-File -FilePath $configPath -InputObject $config
+        Write-Output $config.access_token
+    }
+}
+Function Get-UploadPath {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $deviceName
+    )
+
+    $drive = (Get-Volume -FileSystemLabel $deviceName).DriveLetter
+    
+    if (-Not $drive) {
+        throw "No device found"
+    }
+    
+    Write-Output "$drive`:\GARMIN\ACTIVITY"
+}
+
+Function Get-UploadStatus {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $id,
+        [Parameter()]
+        [string]
+        $token
+    )
+
+    $url = "https://www.strava.com/api/v3/uploads/$id"
+    $headers = @{
+        Authorization = "Bearer $token"
+    }
+
+    Invoke-RestMethod -Method 'Get' -Uri $url -Headers $headers | Write-Output
+}
+
+Function Invoke-ActivityUpload {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $uploadPath,
+        [Parameter()]
+        [string]
+        $token
+    )
+
+    $files = Get-ChildItem $uploadPath -Filter "*.FIT"
+    $url = "https://www.strava.com/api/v3/uploads"
+    $sleep = 5
+    $isUploadDone = 0
+
+    foreach($file in $files) {
+      $form = @{
+          data_type = "fit"
+          file = Get-Item -Path $file
+      }  
+
+      $headers = @{
+        Authorization = "Bearer $token"
+      }
+
+      Write-Host "Uploading $file"
+      $uploadResponse = Invoke-RestMethod -Method 'Post' -Uri $url -Form $form -Headers $headers
+
+      # wait for upload to be done with 5 second polling
+      while (-not $isUploadDone) {
+        Write-Host "Waiting for $sleep seconds to check the upload"
+        Start-Sleep -Seconds $sleep
+        $statusResponse = Get-UploadStatus -id $uploadResponse.id -token $token
+        
+        if ($statusResponse.status -eq "Your activity is ready.") {
+            $isUploadDone = 1
+            Write-Host "Upload completed successfully and the activity will not be deleted"
+            Remove-Item -Path $file
+        }
+        elseif($statusResponse.error) {
+            $isUploadDone = 1
+            Write-Host "There was an error uploading your activity: $($statusResponse.error)"
+        }
+        else {
+            Write-Host "File still processing..."
+        }
+      }
     }
 }
 
-
-# $url = "https://www.strava.com/api/v3/uploads"
-
-# Write-Host " Searching for $device"
-
-# $drive = (Get-Volume -FileSystemLabel $device).DriveLetter
-
-# if (-Not $drive)
-# {
-#     Write-Error "No device found"
-#     return
-# }
-
-# Write-Host "Device found with driver letter: $drive"
-
-# $source = "$drive`:\GARMIN\ACTIVITY"
-
-# Write-Host "Uploading from $source"
-
-
-# $files = Get-ChildItem $source -Filter *.FIT
-
-# foreach ($file in $files) {
-    
-#     Write-Host "Uplading $file"
-     
-#     $form = @{
-#         data_type="fit"
-#         file = Get-Item -Path $file
-#     }
-
-#     $headers = @{
-#         Authorization = "Bearer $apiKey"
-#     }
-
-#     $result = Invoke-RestMethod -Method 'Post' -Uri $url -Form $form -Headers $headers
-
-#     Write-Host $result
-# }
+$authToken = Read-Config -id $ClientId -secret $ClientSecret -configPath $ConfigFileName
+$sourcePath = Get-UploadPath -deviceName $Device
+Write-Host "Starting upload from $sourcePath"
+Invoke-ActivityUpload -uploadPath $sourcePath -token $authToken
