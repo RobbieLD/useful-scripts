@@ -27,7 +27,6 @@ Function Get-AuthCode {
     Write-Host "A browser will now open and ask you to authorize the app. Please paste the code=### value from the redirected url below"
     Start-Process $authEndpoint
     Read-Host "Please enter auth code" | Write-Output
-    
 }
 
 Function Get-AuthToken {
@@ -184,7 +183,7 @@ Function Invoke-ActivityUpload {
         
         if ($statusResponse.status -eq "Your activity is ready.") {
             $isUploadDone = 1
-            Write-Host "Upload completed successfully and the activity will not be deleted"
+            Write-Host "Upload completed successfully and the activity will be deleted"
             Remove-Item -Path $file
         }
         elseif($statusResponse.error) {
