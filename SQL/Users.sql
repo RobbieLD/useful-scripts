@@ -5,17 +5,17 @@ go
 create login BatchLogin with password = 'password';
 go
 
-use [dev-stratos-youi-rates-dev]
+use [my-database]
 go
 
 create user BatchUser for login BatchLogin;
 go
 
-grant select, insert on RatingFactorsAddressRating to BatchUser;
+grant select, insert on MyTable to BatchUser;
 go
 
 -- Remove User
-use [dev-stratos-youi-rates-dev]
+use [my-database]
 go
 
 drop user BatchUser;

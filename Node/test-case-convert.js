@@ -27,9 +27,9 @@ console.log('Test Class: ' + testName)
 // File Contents
 let contents = 'using NUnit.Framework;\n' +
     'using Shouldly;\n' +
-    'using Stratos.Youi.Calc.Assemblies.Perils.Test.Helpers;\n' +
+    'using Company.NameSpace;\n' +
     '\n' +
-    'namespace Stratos.Youi.Calc.Assemblies.Perils.Test.UserFunctions.Underwriting.' + namespace + '\n' +
+    'namespace Company.Namespace.' + namespace + '\n' +
     '{\n' +
     '\t[TestFixture]\n' +
     '\t[Parallelizable(ParallelScope.None)]\n' +
@@ -116,11 +116,11 @@ const argsBuilder = (record) => {
 const writter = () => {
     contents +=
         testCases.reduce((tcs, tc) => tcs += `\t\t${tc}\n`, '') +
-        '\t\tpublic void gets_correct_classifications(' + args.format() + ')\n' +
+        '\t\tpublic void get_test_value(' + args.format() + ')\n' +
         '\t\t{\n' +
         '\t\t\tvar parameters = new Parameters().SetDefault("Risk", "PerilGroup");\n' +
         '\t\t\t/// params\n' +
-        '\t\t\tvar result = new Shared.UserFunctions.' + namespace + '().V1(parameters);\n' +
+        '\t\t\tvar result = new SomeFunction.' + namespace + '().V1(parameters);\n' +
         '\t\t\tresult.Value.ShouldBe(expectedOutcome);\n' +
         '\t\t}\n' +
         '\t}\n' +
