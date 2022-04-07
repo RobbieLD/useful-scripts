@@ -195,6 +195,9 @@ Function Invoke-ActivityUpload {
         }
       }
     }
+
+    # Open strava to see the new activities
+    Start-Process "https://www.strava.com"
 }
 
 $authToken = Read-Config -id $ClientId -secret $ClientSecret -configPath $ConfigFileName
