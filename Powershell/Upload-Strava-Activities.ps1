@@ -160,7 +160,6 @@ Function Invoke-ActivityUpload {
     $files = Get-ChildItem $uploadPath -Filter "*.FIT"
     $url = "https://www.strava.com/api/v3/uploads"
     $sleep = 5
-    $isUploadDone = 0
 
     foreach($file in $files) {
       $form = @{
@@ -174,7 +173,8 @@ Function Invoke-ActivityUpload {
 
       Write-Host "Uploading $file"
       $uploadResponse = Invoke-RestMethod -Method 'Post' -Uri $url -Form $form -Headers $headers
-
+      $isUploadDone = 0
+      
       # wait for upload to be done with 5 second polling
       while (-not $isUploadDone) {
         Write-Host "Waiting for $sleep seconds to check the upload"
