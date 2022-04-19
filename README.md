@@ -25,6 +25,8 @@ This is a list and brief description of scripts which are contain useful example
 
 [Upload-Strava-Activities.ps1](Powershell/Upload-Strava-Activities.ps1) - Performs the Strava OAuth flow and uploads activities from a garmin device.
 
+[Git-Log-Parse.ps1](Powershell/Git-Log-Parse.ps1) - Parses the git log for specific messages and outputs a mark down table derived from the git log
+
 ## SQL
 
 [Current_Sessions.sql](SQL/Current_Sessions.sql) - Selects the sessions currently logged in to the database
