@@ -7,5 +7,5 @@ Write-Host  "| Class | Field | Data Type |"
 Write-Host  "| ----- | ----- | ----------|"
 
 foreach ($message in $messages) {
-    Write-Host "|$($message.dataprep.class) | $($message.dataprep.field) | $($messages.dataprep.type) |"
+    Write-Host "|$($message.dataprep.class) | $($message.dataprep.field) | $($message.dataprep.type) |"
 }
