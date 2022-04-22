@@ -4,8 +4,8 @@ $messages = "{`"root`":[$(git log master..develop --grep='dataprep' --pretty=for
 Write-Output -InputObject "# Data Prep"
 Write-Output -InputObject ""
 Write-Output -InputObject "| Class | Field | Data Type |"
-Write-Output -InputObject  "| ----- | ----- | ----------|"
+Write-Output -InputObject "| ----- | ----- | ----------|"
 
 foreach ($message in $messages.root) {
-    Write-Output -InputObject "|$($message.dataprep.class) | $($message.dataprep.field) | $($message.dataprep.type) |"
+    Write-Output -InputObject "|$($message.dataprep.class) | $($message.dataprep.field) | $($message.dataprep.type.Replace('<', '\<').Replace('>', '\>')) |"
 }
