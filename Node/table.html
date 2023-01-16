@@ -1,0 +1,24 @@
+<html data-theme="dark">
+    <head>
+        <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+        <title>Pod Trace</title>
+    </head>
+
+    <body>
+        <table class="sortable">
+            {content}
+        </table>
+        <style>
+            tbody tr:hover {
+                background-color: #192935;
+            }
+
+            table,
+            th {
+                font-size: small;
+            }
+        </style>
+    </body>
+
+</html>

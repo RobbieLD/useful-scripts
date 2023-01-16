@@ -1,6 +1,6 @@
 
 $messages = "{`"root`":[$(git log master..develop --grep='dataprep' --pretty=format:"%b,")]}" | ConvertFrom-Json
-
+Write-Host $messages
 Write-Output -InputObject "# Data Prep"
 Write-Output -InputObject ""
 Write-Output -InputObject "| Class | Field | Data Type |"

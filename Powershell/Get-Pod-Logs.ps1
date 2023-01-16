@@ -8,7 +8,10 @@ param(
     $PodPrefix,
     [Parameter()]
     [string[]]
-    $Contexts
+    $Contexts,
+    [Parameter()]
+    [string]
+    $Namespace
 )
 
 Function Get-PodNames {
@@ -46,7 +49,13 @@ Function Get-PodLog {
     kubectl logs $name -n $namespace > "$LogPath\$name.log"
 }
 
+Write-Host "Removing existing logs"
+Remove-Item "$LogPath\*.log"
+
 foreach ($context in $Contexts) {
     kubectl config use-context $context
-    Get-PodNames -namespace prod -name $PodPrefix | ForEach-Object { Get-PodLog -namespace prod -name $_ }
+    Get-PodNames -namespace $Namespace -name $PodPrefix | ForEach-Object { Get-PodLog -namespace $Namespace -name $_ }
 }
+
+Write-Host "Merging Logs"
+Get-Content "$LogPath\*.log" | Sort-Object | Set-Content "$LogPath\merge.log"
