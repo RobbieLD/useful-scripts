@@ -1,2 +1,6 @@
 .vscode/
 *.json
+Node/.vscode/
+Node/node_modules/
+Node/package-lock.json
+Node/package.json

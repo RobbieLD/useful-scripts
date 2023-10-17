@@ -11,8 +11,12 @@ go
 create user BatchUser for login BatchLogin;
 go
 
-grant select, insert on MyTable to BatchUser;
+grant select, insert, connect on MyTable to BatchUser;
 go
+
+ALTER USER BatchUser WITH DEFAULT_SCHEMA = dbo
+go
+
 
 -- Remove User
 use [my-database]
